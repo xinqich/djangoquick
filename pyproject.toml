@@ -1,5 +1,5 @@
 [project]
-name = "djangoquick"
+name = "CRMLite"
 version = "0.1.0"
 description = ""
 authors = [
@@ -8,10 +8,23 @@ authors = [
 requires-python = ">=3.13"
 dependencies = [
     "django (>=6.0.5,<7.0.0)",
-    "djangorestframework (>=3.17.1,<4.0.0)"
+    "djangorestframework (>=3.17.1,<4.0.0)",
+    "djangorestframework-simplejwt (>=5.5.1,<6.0.0)",
+    "drf-spectacular (>=0.29.0,<1.0.0)",
+    "pytest (>=8.4.0,<9.0.0)",
+    "pytest-django (>=4.11.1,<5.0.0)",
 ]
-
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "core.settings"
+pythonpath = ["app"]
+testpaths = ["app"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-ra"
