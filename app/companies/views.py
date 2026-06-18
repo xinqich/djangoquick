@@ -7,9 +7,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .helpers import get_user_company, get_user_company_storage, get_user_owned_company
-from .models import Company, Storage
-from .permissions import IsCompanyOwnerUser
+from .helpers import get_user_company, get_user_company_storage
+from .models import Company
+from .permissions import HasUserCompany, IsOwner
 from .serializers import (
     CompanySerializer,
     EmployeeBriefSerializer,
@@ -34,11 +34,11 @@ class CompanyViewSet(
         if self.action == "retrieve":
             return [permissions.IsAuthenticated()]
         if self.action == "me":
-            return [permissions.IsAuthenticated()]
+            return [permissions.IsAuthenticated(), HasUserCompany(), IsOwner()]
         if self.action == "attach_user_to_company":
-            return [permissions.IsAuthenticated()]
+            return [permissions.IsAuthenticated(), HasUserCompany(), IsOwner()]
         if self.action == "detach_user_from_company":
-            return [permissions.IsAuthenticated()]
+            return [permissions.IsAuthenticated(), HasUserCompany(), IsOwner()]
         return super().get_permissions()
 
     @extend_schema(
@@ -56,7 +56,7 @@ class CompanyViewSet(
     )
     @action(detail=False, methods=["put", "patch", "delete"], url_path="me")
     def me(self, request):
-        company = get_user_owned_company(request.user)
+        company = get_user_company(request.user)
 
         if request.method == "DELETE":
             company.delete()
@@ -92,7 +92,7 @@ class CompanyViewSet(
         url_name="attach-user-to-company",
     )
     def attach_user_to_company(self, request):
-        company = get_user_owned_company(request.user)
+        company = get_user_company(request.user)
         if request.method == "GET":
             qs = (
                 User.objects.filter(company_id=company.id)
@@ -127,7 +127,7 @@ class CompanyViewSet(
         url_name="detach-user-from-company",
     )
     def detach_user_from_company(self, request, employee_pk=None):
-        company = get_user_owned_company(request.user)
+        company = get_user_company(request.user)
         try:
             target_pk = int(employee_pk)
         except (TypeError, ValueError):
@@ -162,7 +162,7 @@ class StorageAPIView(APIView):
     def get_permissions(self):
         if self.request.method == "GET":
             return [permissions.IsAuthenticated()]
-        return [permissions.IsAuthenticated(), IsCompanyOwnerUser()]
+        return [permissions.IsAuthenticated(), HasUserCompany(), IsOwner()]
 
     @extend_schema(
         responses={200: StorageSerializer},
@@ -216,23 +216,11 @@ class StorageAPIView(APIView):
     )
     def delete(self, request):
         storage = get_user_company_storage(request.user)
-        company = get_user_company(request.user)
-        if company.owner_id != request.user.id:
-            self.permission_denied(
-                request,
-                message=_("Изменение склада доступно только владельцу компании."),
-            )
         storage.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _update(self, request, partial):
         storage = get_user_company_storage(request.user)
-        company = get_user_company(request.user)
-        if company.owner_id != request.user.id:
-            self.permission_denied(
-                request,
-                message=_("Изменение склада доступно только владельцу компании."),
-            )
         serializer = StorageSerializer(
             storage,
             data=request.data,

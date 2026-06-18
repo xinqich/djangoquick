@@ -11,17 +11,23 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from datetime import timedelta
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from the .env file at the repository root.
+load_dotenv(BASE_DIR.parent / ".env")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-xahwj_@83+@wv4c6wtujvrkxcd6lt*nz(u-)9676svqokg6hw%"
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -43,6 +49,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "authenticate.apps.AuthenticateConfig",
     "companies.apps.CompaniesConfig",
+    "inventory.apps.InventoryConfig",
 ]
 
 MIDDLEWARE = [
@@ -143,7 +150,7 @@ SIMPLE_JWT = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Инвентаризация и продажи",
-    "DESCRIPTION": "API: компании, склады, аутентификация (этап 1).",
+    "DESCRIPTION": "API: компании, склады, поставщики, товары, поставки, аутентификация.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],

@@ -150,10 +150,15 @@ def test_storage_owner_only_and_member_retrieve(api_client, user_a, user_b):
     create_st = api_client.post(
         reverse("storage"), {"address": "Другой"}, format="json"
     )
-    assert create_st.status_code == status.HTTP_403_FORBIDDEN
+    assert create_st.status_code == status.HTTP_404_NOT_FOUND
 
     user_b.company_id = company["id"]
     user_b.save(update_fields=["company_id"])
+    create_st_employee = api_client.post(
+        reverse("storage"), {"address": "Другой"}, format="json"
+    )
+    assert create_st_employee.status_code == status.HTTP_403_FORBIDDEN
+
     get_st = api_client.get(reverse("storage"))
     assert get_st.status_code == status.HTTP_200_OK
     assert get_st.data["address"] == addr
