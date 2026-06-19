@@ -1,1 +1,7 @@
-An .env file with the SECRET_KEY variable must be created at the root folder to run the app 
+Steps to run the app (ran from the root folder):
+```
+poetry env activate
+poetry install
+python app/manage.py migrate
+python app/manage.py runserver
+```
