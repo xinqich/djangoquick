@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "authenticate.apps.AuthenticateConfig",
     "companies.apps.CompaniesConfig",
     "inventory.apps.InventoryConfig",
+    "sales.apps.SalesConfig",
 ]
 
 MIDDLEWARE = [
